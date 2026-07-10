@@ -14,30 +14,23 @@ DROP TABLE IF EXISTS Users;
 -- 1. CREATE USERS TABLE
 -- =========================================================================
 CREATE TABLE Users (
-    user_id TYPE,
-    full_name TYPE,
-    email TYPE,
-    role TYPE,
-    phone_number TYPE,
-    
-    -- Write your constraint to make 'user_id' the Primary Key
-    -- Write your constraint to ensure 'email' values are never duplicated
-    -- Write your check constraint to restrict 'role' to specific allowed strings
+    user_id       INT           PRIMARY KEY,
+    full_name     VARCHAR(100)  NOT NULL,
+    email         VARCHAR(150)  NOT NULL UNIQUE,
+    role          VARCHAR(20)   NOT NULL CHECK (role IN ('Football Fan', 'Ticket Manager')),
+    phone_number  VARCHAR(20)   NULL
 );
 
 -- =========================================================================
 -- 2. CREATE MATCHES TABLE
 -- =========================================================================
+
 CREATE TABLE Matches (
-    match_id TYPE,
-    fixture TYPE,
-    tournament_category TYPE,
-    base_ticket_price TYPE,
-    match_status TYPE,
-    
-    -- Write your constraint to make 'match_id' the Primary Key
-    -- Write your check constraint to prevent negative ticket prices
-    -- Write your check constraint to restrict 'match_status' values
+    match_id             INT           PRIMARY KEY,
+    fixture              VARCHAR(150)  NOT NULL,
+    tournament_category  VARCHAR(50)   NOT NULL,
+    base_ticket_price     DECIMAL(10,2) NOT NULL CHECK (base_ticket_price >= 0),
+    match_status         VARCHAR(20)   NOT NULL CHECK (match_status IN ('Available', 'Selling Fast', 'Sold Out'))
 );
 
 -- =========================================================================
@@ -57,7 +50,19 @@ CREATE TABLE Bookings (
     -- Write your check constraint to ensure 'total_cost' is non-negative
     -- Write your check constraint to restrict 'payment_status' values
 );
+CREATE TABLE Bookings (
+    booking_id      INT           PRIMARY KEY,
+    user_id         INT           NOT NULL,
+    match_id        INT           NOT NULL,
+    seat_number     VARCHAR(10)   NULL,
+    payment_status  VARCHAR(20)   NULL CHECK (payment_status IN ('Confirmed', 'Pending', 'Failed')),
+    total_cost      DECIMAL(10,2) NOT NULL CHECK (total_cost >= 0),
 
+    CONSTRAINT fk_bookings_user
+        FOREIGN KEY (user_id) REFERENCES Users(user_id),
+    CONSTRAINT fk_bookings_match
+        FOREIGN KEY (match_id) REFERENCES Matches(match_id)
+);
 
 -- =========================================================================
 -- DATA SEEDING: INSERT SAMPLE DATA INTO USERS
